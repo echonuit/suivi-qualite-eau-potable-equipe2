@@ -16,7 +16,7 @@ final class Reseau
         </form>
 
     <?php
-    return (new Layout("Réseau","Page de recherche des données de réseau",ob_get_clean()))->afficher();    
+    return (new Layout("Réseau", "Page de recherche des données de réseau", ob_get_clean()))->afficher();
     }
 
 }
