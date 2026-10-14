@@ -6,6 +6,7 @@ declare(strict_types=1);
 // (voir docker/php/apache.conf). Ce fichier choisit la page à afficher, et c'est tout.
 
 use EauPotable\Pages\Accueil;
+use EauPotable\Pages\Reseau;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -15,6 +16,7 @@ $chemin = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 // toute la vue (/reseau/013000618?parametres=1340) : concevez leur schéma d'abord.
 $page = match ($chemin) {
     '/' => (new Accueil())->afficher(),
+    '/reseau' => (new Reseau())->afficher(),
     default => null,
 };
 

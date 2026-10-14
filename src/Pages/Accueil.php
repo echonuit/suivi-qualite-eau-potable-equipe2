@@ -33,7 +33,7 @@ final class Accueil
             </p>
 
             <div >
-                <a href="/index.php?page=donnees" class="btn btn-primary">
+                <a href="/reseau" class="btn btn-primary">
                     Explorer les données
                 </a>
 
