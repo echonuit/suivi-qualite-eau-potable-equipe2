@@ -10,7 +10,10 @@ final class Reseau
     {
         ob_start(); ?>
 
-        <p> Test page réseau fonctionnelle </p>
+        <form>
+            <label for="ville"> Entrez le nom de votre ville : </label>
+            <input type="text" id="ville">
+        </form>
 
     <?php
     return (new Layout("Réseau","Page de recherche des données de réseau",ob_get_clean()))->afficher();    
