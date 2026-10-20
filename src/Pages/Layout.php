@@ -8,6 +8,7 @@ class Layout
         private string $titre,
         private string $description,
         private string $contenu,
+        private array $styles = []
     ) {}
 
     public function afficher(): string
@@ -19,6 +20,10 @@ class Layout
     <meta charset="utf-8"/>
     <meta name="description" content="<?php echo htmlspecialchars($this->description) ?>"/>
     <title><?php echo htmlspecialchars($this->titre) ?></title>
+    <link rel="stylesheet" href="/styles/global.css">
+    <?php foreach ($this->styles as $style): ?>
+        <link rel="stylesheet" href="/src/styles/<?php echo htmlspecialchars($style) ?>.css">
+    <?php endforeach; ?>
 </head>
 <body>
 <header>
