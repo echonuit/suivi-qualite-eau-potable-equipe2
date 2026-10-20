@@ -1,0 +1,70 @@
+Diagramme de cas d'utilisation UML
+
+Code PlantUML de diagramme-cas-utilisation.png :
+
+@startuml
+left to right direction
+
+actor "Usager" as Usager
+actor "Habitant \n(Camille)" as Habitant
+actor "Élu / Journaliste /\nAssociation \n(Alexa)" as Elu
+actor "Chercheur /\nBureau d'études \n(Samuel)" as Chercheur
+rectangle "<<actor>> \n  BDD" as BDD
+rectangle "<<actor>> \n  API" as API
+
+rectangle "App - Suivi de la qualité de l'eau" as App {
+
+  usecase "Rechercher une commune" as UC2
+  usecase "Choisir un réseau" as UC3
+  usecase "Sélectionner les paramètres" as UC4
+  usecase "Choisir une période" as UC5
+  usecase "Consulter graphique et seuils" as UC6
+
+  usecase "Comparer des réseaux" as UC9
+  usecase "Consulter les parametres E-Phy" as UC10
+  usecase "Consulter dernier bulletin" as UC11
+  usecase "Visualiser une carte" as UC12
+  usecase "Visualiser les alertes" as UC13
+
+  usecase "Partager une vue par URL" as UC7
+  usecase "Exporter en CSV" as UC8
+  usecase "Sauvegarder favoris et configuration" as UC14
+}
+
+Usager--->UC2
+Usager--->UC3
+Usager--->UC4
+Usager--->UC5
+Usager--->UC6
+Usager--->UC10
+Usager--->UC11
+Usager--->UC13
+Usager---> UC14
+
+Elu---> Usager
+Chercheur ---> Usager
+Habitant--> Usager
+
+Habitant--> UC7
+Elu--> UC7
+Elu--> UC9
+Elu--> UC12
+Chercheur --> UC8
+
+‘Cette partie n’est pas affiché pour améliorer la lisibilité du diagram
+‘(Le côté droite du diagramme a été ajouté sans code pour améliorer l'affichage)
+'UC2 -r-> BDD
+'UC3 -r-> BDD
+'UC4 -r-> BDD
+'UC5 -r-> BDD
+'UC6 -r-> BDD
+'UC9 -r-> BDD
+'UC11 -r-> BDD
+'UC12 -r-> BDD
+'UC13 -r-> BDD
+'UC10 -r-> API
+
+'**Selon l'implémentation finale
+'certains UC pourraient être liés plutôt à l’API ou à la BDD**
+
+@enduml
