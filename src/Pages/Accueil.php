@@ -16,7 +16,7 @@ final class Accueil
     {
         ob_start(); ?>
 
-<div>
+<div class="container">
     <h2>Aqualité, le service gratuit de suivi de la qualité de l'eau potable</h2>
     <p>
        Pouvoir connaître la qualité de son eau est essentiel pour une bonne consomation en France. <br>
@@ -26,7 +26,7 @@ final class Accueil
 
        Commencez à rechercher dès maintenant :
     </p>
-    <a href="/reseau"> Rechercher une commune </a>
+    <a href="/reseau" class="button"> Rechercher une commune </a>
 </div>
 
 <?php
