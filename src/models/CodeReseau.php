@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace EauPotable\Metier;
+namespace EauPotable\models;
 
 use InvalidArgumentException;
 

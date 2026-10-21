@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace EauPotable\Tests\Metier;
 
-use EauPotable\Metier\CodeReseau;
+use EauPotable\models\CodeReseau;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;

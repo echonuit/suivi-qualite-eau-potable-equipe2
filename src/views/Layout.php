@@ -1,14 +1,17 @@
 <?php
 
-namespace EauPotable\Pages;
+namespace EauPotable\views;
 
 class Layout
 {
+    /**
+     * @param array<string> $styles Chemins des feuilles de style CSS.
+     */
     public function __construct(
         private string $titre,
         private string $description,
         private string $contenu,
-        private array $styles = []
+        private array $styles = [],
     ) {}
 
     public function afficher(): string
