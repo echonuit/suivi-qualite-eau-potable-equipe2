@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace EauPotable\Pages;
+namespace EauPotable\views;
 
 /**
  * Exemple fourni avec le squelette : la page d'accueil dit si l'environnement est prêt.
@@ -10,9 +10,9 @@ namespace EauPotable\Pages;
  * À remplacer par votre première vraie page. Elle montre la forme d'une page :
  * elle appelle les autres couches, puis rend du HTML dont chaque valeur est échappée.
  */
-final class Accueil
+final class AccueilView
 {
-    public function afficher(): string
+    public function executer(): string
     {
         ob_start(); ?>
 
@@ -33,8 +33,8 @@ final class Accueil
         return (new Layout("Aqualité", "Page d'accueil", ob_get_clean()))->afficher();
     }
 
-    private static function echapper(string $texte): string
-    {
-        return htmlspecialchars($texte, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-    }
+    // private static function echapper(string $texte): string
+    // {
+    //     return htmlspecialchars($texte, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    // }
 }

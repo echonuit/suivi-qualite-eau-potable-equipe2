@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace EauPotable\Tests\Donnees;
 
-use EauPotable\Donnees\Connexion;
-use EauPotable\Donnees\Diagnostic;
+use EauPotable\models\Connexion;
+use EauPotable\models\Diagnostic;
 use PHPUnit\Framework\TestCase;
 
 /**

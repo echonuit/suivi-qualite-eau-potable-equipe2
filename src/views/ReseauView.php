@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace EauPotable\Pages;
+namespace EauPotable\views;
 
-final class Reseau
+final class ReseauView
 {
-    public function afficher(): string
+    public function executer(): string
     {
         ob_start(); ?>
 
