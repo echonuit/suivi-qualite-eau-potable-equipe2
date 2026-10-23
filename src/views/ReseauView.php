@@ -10,7 +10,7 @@ final class ReseauView
     {
         ob_start(); ?>
 
-	    <label for="choix-commune">Rechercher un commune :</label>
+	    <label for="choix-commune">Rechercher une commune :</label>
         <input list="communes" id="choix-commune" name="commune" >
         <datalist id="communes">
         <?php foreach ($communes as $commune): ?>
