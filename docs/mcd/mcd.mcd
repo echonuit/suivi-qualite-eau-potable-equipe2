@@ -1,0 +1,13 @@
+QUARTIER: id_quartier, nom_quartier
+DESSERVI, 1N RESEAU, 11 QUARTIER
+RESEAU: code_reseau, nom_reseau
+CONCERNE, 0N RESEAU, 11 PRELEVEMENT
+PRELEVEMENT: reference, date_, conclusion
+
+POSSEDE, 0N COMMUNE, 11 QUARTIER
+COMMUNE_RESEAU, 0N COMMUNE, 0N RESEAU
+COMPREND, 1N PRELEVEMENT, 11 RESULTAT
+
+COMMUNE: insee, nom_commune, code_postal
+RESULTAT: code_param_sandre, code_param_siseaux, code_param_cas, libelle, nature, unite, res_libelle, res_brut
+
