@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace EauPotable\controllers;
 
-use EauPotable\views\ReseauView;
 use EauPotable\models\ReseauModel;
-
+use EauPotable\views\ReseauView;
 
 final class ReseauController
 {
