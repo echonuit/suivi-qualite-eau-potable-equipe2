@@ -14,7 +14,7 @@ final class ReseauView
         <input list="communes" id="choix-commune" name="commune" >
         <datalist id="communes">
         <?php foreach ($communes as $commune): ?>
-            <option value="<?= htmlspecialchars($commune['nom'].'('. $commune['code_postal'].')') ?>">
+            <option value="<?= htmlspecialchars($commune['nom_commune'].'('. $commune['code_postal'].')') ?>">
         <?php endforeach; ?>
         </datalist>
 

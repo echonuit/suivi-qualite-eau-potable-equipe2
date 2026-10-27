@@ -9,18 +9,18 @@ final class InsererFichierBD
     public static function insererCSV(string $fichier, string $table, array $colonnes = [], string $delimiteur = ","): void
     {
         $pdo = Connexion::ouvrir();
-    
+
         if ($flux = fopen("csv/". $fichier,"r")) {
 
             if ($table === "commune") {
-                $query = $pdo->prepare('INSERT INTO schema.commune (insee, nom, code_postal)VALUES (:insee, :nom, :code_postal) ON CONFLICT (insee) DO NOTHING');
+                $query = $pdo->prepare('INSERT INTO schema.commune (insee, nom_commune, code_postal)VALUES (:insee, :nom_commune, :code_postal) ON CONFLICT (insee) DO NOTHING');
             }
 
             $n = 0;
             while (($ligne = fgetcsv($flux, separator: $delimiteur, escape: "\\")) !== false) {
                 if ($n > 0) {
                     if ($table === "commune") {
-                        $query->execute(['insee' => $ligne[0],'nom' => $ligne[1],'code_postal' => $ligne[2]]);
+                        $query->execute(['insee' => $ligne[0],'nom_commune' => $ligne[1],'code_postal' => $ligne[2]]);
                     }
                 }
 
