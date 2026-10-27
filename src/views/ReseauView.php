@@ -6,6 +6,9 @@ namespace EauPotable\views;
 
 final class ReseauView
 {
+    /**
+ * @param array<int, array{nom_commune: string, code_postal: string}> $communes
+ */
     public function executer(array $communes): string
     {
         ob_start(); ?>
@@ -14,7 +17,7 @@ final class ReseauView
         <input list="communes" id="choix-commune" name="commune" >
         <datalist id="communes">
         <?php foreach ($communes as $commune): ?>
-            <option value="<?= htmlspecialchars($commune['nom_commune'].'('. $commune['code_postal'].')') ?>">
+            <option value="<?= htmlspecialchars($commune['nom_commune'] . '(' . $commune['code_postal'] . ')') ?>">
         <?php endforeach; ?>
         </datalist>
 
