@@ -27,7 +27,7 @@ final class ReseauView
             <datalist id="liste-communes">
                 <?php foreach ($communes as $commune): ?>
                     <option
-                        value="<?= $this->escape($commune['nom_commune'] . ' (' . $commune['code_postal'] . ')') ?>"
+                        value="<?= $this->escape($commune['nom_commune'] . ' (' . $commune['departement'] . ')') ?>"
                         data-insee="<?= $this->escape($commune['insee']) ?>" >
                     </option>
                     <?php endforeach; ?>
