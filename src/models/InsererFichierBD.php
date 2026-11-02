@@ -10,43 +10,57 @@ use Throwable;
 final class InsererFichierBD
 {
     /**
-     * @param int[] $colonnes
+     * @param string $fichier
      */
-    public static function insererCSV(string $fichier, string $table, array $colonnes = [], string $delimiteur = ","): void
+    public static function insererCommunesCSV(string $fichier): void
     {
         $pdo = Connexion::ouvrir();
-        //cette modification limite ce fonction a la table commune
-        //empeche $query d'etre no definie d'apres la derniere implementation
-        if ($table !== "commune") {
-            return;
-        }
-        if ($flux = fopen("csv/" . $fichier, "r")) {
 
-            //if ($table === "commune") {
-            $query = $pdo->prepare('INSERT INTO schema.commune (insee, nom_commune, code_postal)VALUES (:insee, :nom_commune, :code_postal) ON CONFLICT (insee) DO NOTHING');
-            // }
+        $flux = fopen("public/csv/" . $fichier, "r");
+
+        if ($flux === false) {
+            throw new RuntimeException("Impossible d'ouvrir le fichier CSV.");
+        }
+
+
+        //L'execution des requetes et faite dans une transaction qui verifie qu'il n'y a pas d'erreur
+        // lors de l'insertion de tous les donnees (les trois tables comprises) et dans les references entre les tables
+        // sinon rollback
+        try {
+            echo 'Avant transaction';
+            $pdo->beginTransaction();
+
+            $query = $pdo->prepare(
+                'INSERT INTO schema.commune (insee, nom_commune, departement)
+             VALUES (:insee, :nom_commune, :departement)
+             ON CONFLICT (insee) DO NOTHING',
+            );
 
             $n = 0;
-            while (($ligne = fgetcsv($flux, separator: $delimiteur, escape: "\\")) !== false) {
+            while (($ligne = fgetcsv($flux, separator: ";", enclosure: '"', escape: "\\")) !== false) {
+                echo 'Dans la boucle \n' . $n;
                 if ($n > 0) {
-                    //if ($table === "commune") {
-                    $query->execute(['insee' => $ligne[0],'nom_commune' => $ligne[1],'code_postal' => $ligne[2]]);
-                    //}
+                    $query->execute(['insee' => $ligne[0], 'nom_commune' => $ligne[1], 'departement' => substr((string) $ligne[0], 0, 2)]);
                 }
-
                 $n++;
             }
 
-            fclose($flux);
+            $pdo->commit();
 
-        } else {
-            echo "Erreur de flux";
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+
+        } finally {
+            fclose($flux);
         }
     }
 
-    public static function insererCommunesCSV(): void
+    public static function insererCommunes(): void
     {
-        InsererFichierBD::insererCSV("communes-france.csv", "commune", [0,1,2], ";");
+        self::insererCommunesCSV("communes-quartiers-reseaux.csv");
     }
 
     public static function insererReseauxQuartiersCSV(string $fichier): void
