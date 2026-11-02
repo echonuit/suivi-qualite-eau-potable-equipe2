@@ -17,12 +17,12 @@ final class ReseauModel
     * @return array<int, array{
      *     insee: string,
      *     nom_commune: string,
-     *     code_postal: string
+     *     departement: string
      * }>
      */
     public function getToutesLesCommunes(): array
     {
-        $requete = $this->pdo->prepare('SELECT insee, nom_commune, code_postal FROM schema.commune ORDER BY nom_commune, code_postal');
+        $requete = $this->pdo->prepare('SELECT insee, nom_commune, departement FROM schema.commune ORDER BY nom_commune, departement');
         $requete->execute();
         return $requete->fetchAll(PDO::FETCH_ASSOC);
     }
