@@ -11,12 +11,12 @@ use EauPotable\controllers\ReseauController;
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 $chemin = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
-
+$requete = $_GET;
 // Ajoutez vos pages ici, une ligne par adresse. Les adresses de ce projet portent
 // toute la vue (/reseau/013000618?parametres=1340) : concevez leur schéma d'abord.
 $page = match ($chemin) {
     '/' => (new AccueilController())->executer(),
-    '/reseau' => (new ReseauController())->executer(),
+    '/reseau' => (new ReseauController())->executer($requete),
     default => null,
 };
 
