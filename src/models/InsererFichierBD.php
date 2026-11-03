@@ -175,7 +175,7 @@ public static function insererPrelevement(string $annee, int $codeParam): void{
                 ON CONFLICT (reference, code_reseau) DO NOTHING',
             );
 
-        $resultatAPI = AppelAPI::getData('resultats_dis',['date_max_prelevement' => $annee . "-12-31",'date_min_prelevement' => $annee . "-01-01",'size' => 5000, "code_parametre" => $codeParam]);
+        $resultatAPI = AppelAPI::obtenirDonnees('resultats_dis',['date_max_prelevement' => $annee . "-12-31",'date_min_prelevement' => $annee . "-01-01",'size' => 5000, "code_parametre" => $codeParam]);
 
             $nbRequetesExecutees = 0;
             $total = $resultatAPI['count'];
@@ -218,7 +218,7 @@ public static function insererPrelevement(string $annee, int $codeParam): void{
                 
 
                 if($nextUrl !== null) {
-                    $resultatAPI = AppelAPI::getDataFromRawURL($nextUrl);
+                    $resultatAPI = AppelAPI::obtenirDonneesDepuisURL($nextUrl);
                 } else {
                     break;
                 }
