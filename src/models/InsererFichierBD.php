@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace EauPotable\models;
 
-use EauPotable\models\AppelAPI;
 use RuntimeException;
 use Throwable;
 
@@ -145,15 +144,16 @@ final class InsererFichierBD
         self::insererReseauxQuartiersCSV("communes-quartiers-reseaux.csv");
     }
 
-    
-/**
- * @param string $annee L'année des prélèvements à inserer
- * @param int $codeParam Le code paramètre Sise-Eaux à insérer (ex. 1340 = Nitrates)
- * 
- * Insère les données de l'API Hubeau dans la BD (tables: prelevement, reseau_prelevement, resultat) provenant de l'année donnée.
- * L'insertion est fragmentée en années pour limiter la taille des importations et éviter de gérer des millions de tuples d'un coup.
-*/
-public static function insererPrelevement(string $annee, int $codeParam): void{
+
+    /**
+     * @param string $annee L'année des prélèvements à inserer
+     * @param int $codeParam Le code paramètre Sise-Eaux à insérer (ex. 1340 = Nitrates)
+     *
+     * Insère les données de l'API Hubeau dans la BD (tables: prelevement, reseau_prelevement, resultat) provenant de l'année donnée.
+     * L'insertion est fragmentée en années pour limiter la taille des importations et éviter de gérer des millions de tuples d'un coup.
+    */
+    public static function insererPrelevement(string $annee, int $codeParam): void
+    {
         $pdo = Connexion::ouvrir();
 
         try {
@@ -175,7 +175,7 @@ public static function insererPrelevement(string $annee, int $codeParam): void{
                 ON CONFLICT (reference, code_reseau) DO NOTHING',
             );
 
-        $resultatAPI = AppelAPI::obtenirDonnees('resultats_dis',['date_max_prelevement' => $annee . "-12-31",'date_min_prelevement' => $annee . "-01-01",'size' => 5000, "code_parametre" => $codeParam]);
+            $resultatAPI = AppelAPI::obtenirDonnees('resultats_dis', ['date_max_prelevement' => $annee . "-12-31",'date_min_prelevement' => $annee . "-01-01",'size' => 5000, "code_parametre" => $codeParam]);
 
             $nbRequetesExecutees = 0;
             $total = $resultatAPI['count'];
@@ -189,16 +189,16 @@ public static function insererPrelevement(string $annee, int $codeParam): void{
 
                 try {
 
-                    for ($i = 0; $i < sizeof($data); $i++){
+                    for ($i = 0; $i < sizeof($data); $i++) {
 
                         $page = $data[$i];
 
-                        $queryPrelevement->execute(['reference' => $page["code_prelevement"], 'date_prelevement' => substr($page["date_prelevement"],0,10), 'conclusion' => $page["conclusion_conformite_prelevement"]]);
+                        $queryPrelevement->execute(['reference' => $page["code_prelevement"], 'date_prelevement' => substr($page["date_prelevement"], 0, 10), 'conclusion' => $page["conclusion_conformite_prelevement"]]);
 
-                        $queryResultat->execute(['reference'=> $page["code_prelevement"],'code_param_sandre' => $page["code_parametre"], 'code_param_siseeaux' => $page["code_parametre_se"], 'code_param_cas' => $page["code_parametre_cas"], 'libelle' => $page["libelle_parametre"], 'nature' => $page['code_type_parametre'], 'unite' => $page['libelle_unite'], 'res_libelle' => $page['resultat_alphanumerique'], 'res_brut' => $page['resultat_numerique']]);
+                        $queryResultat->execute(['reference' => $page["code_prelevement"],'code_param_sandre' => $page["code_parametre"], 'code_param_siseeaux' => $page["code_parametre_se"], 'code_param_cas' => $page["code_parametre_cas"], 'libelle' => $page["libelle_parametre"], 'nature' => $page['code_type_parametre'], 'unite' => $page['libelle_unite'], 'res_libelle' => $page['resultat_alphanumerique'], 'res_brut' => $page['resultat_numerique']]);
 
-                        foreach($page['reseaux'] ?? [] as $reseau){
-                            $queryPrelevementReseau->execute(['reference'=> $page['code_prelevement'], 'code_reseau' => $reseau['code']]);
+                        foreach ($page['reseaux'] ?? [] as $reseau) {
+                            $queryPrelevementReseau->execute(['reference' => $page['code_prelevement'], 'code_reseau' => $reseau['code']]);
                         }
 
                         $nbRequetesExecutees++;
@@ -215,9 +215,9 @@ public static function insererPrelevement(string $annee, int $codeParam): void{
                     throw $e;
                 }
 
-                
 
-                if($nextUrl !== null) {
+
+                if ($nextUrl !== null) {
                     $resultatAPI = AppelAPI::obtenirDonneesDepuisURL($nextUrl);
                 } else {
                     break;
