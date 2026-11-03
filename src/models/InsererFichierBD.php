@@ -38,7 +38,6 @@ final class InsererFichierBD
 
             $n = 0;
             while (($ligne = fgetcsv($flux, separator: ";", enclosure: '"', escape: "\\")) !== false) {
-                echo 'Dans la boucle \n' . $n;
                 if ($n > 0) {
                     $query->execute(['insee' => $ligne[0], 'nom_commune' => $ligne[1], 'departement' => substr((string) $ligne[0], 0, 2)]);
                 }
@@ -144,4 +143,93 @@ final class InsererFichierBD
     {
         self::insererReseauxQuartiersCSV("communes-quartiers-reseaux.csv");
     }
+
+
+    /**
+     * @param string $annee L'année des prélèvements à inserer
+     * @param int $codeParam Le code paramètre Sise-Eaux à insérer (ex. 1340 = Nitrates)
+     *
+     * Insère les données de l'API Hubeau dans la BD (tables: prelevement, reseau_prelevement, resultat) provenant de l'année donnée.
+     * L'insertion est fragmentée en années pour limiter la taille des importations et éviter de gérer des millions de tuples d'un coup.
+    */
+    public static function insererPrelevement(string $annee, int $codeParam): void
+    {
+        $pdo = Connexion::ouvrir();
+
+        try {
+            $queryPrelevement = $pdo->prepare(
+                'INSERT INTO schema.prelevement (reference, date_prelevement, conclusion)
+                VALUES (:reference, :date_prelevement, :conclusion)
+                ON CONFLICT (reference) DO NOTHING',
+            );
+
+            $queryResultat = $pdo->prepare(
+                'INSERT INTO schema.resultat (reference, code_param_sandre, code_param_siseeaux, code_param_cas, libelle, nature, unite, res_libelle, res_brut)
+                VALUES (:reference, :code_param_sandre, :code_param_siseeaux, :code_param_cas, :libelle, :nature, :unite, :res_libelle, :res_brut)
+                ON CONFLICT (reference, code_param_siseeaux) DO NOTHING',
+            );
+
+            $queryPrelevementReseau = $pdo->prepare(
+                'INSERT INTO schema.reseau_prelevement (reference, code_reseau)
+                VALUES (:reference, :code_reseau)
+                ON CONFLICT (reference, code_reseau) DO NOTHING',
+            );
+
+            $resultatAPI = AppelAPI::obtenirDonnees('resultats_dis', ['date_max_prelevement' => $annee . "-12-31",'date_min_prelevement' => $annee . "-01-01",'size' => 5000, "code_parametre" => $codeParam]);
+
+            $nbRequetesExecutees = 0;
+            $total = $resultatAPI['count'];
+
+            while (true) {
+
+                $nextUrl = $resultatAPI['next'] ?? null;
+                $data = $resultatAPI['data'];
+
+                $pdo->beginTransaction();
+
+                try {
+
+                    for ($i = 0; $i < sizeof($data); $i++) {
+
+                        $page = $data[$i];
+
+                        $queryPrelevement->execute(['reference' => $page["code_prelevement"], 'date_prelevement' => substr($page["date_prelevement"], 0, 10), 'conclusion' => $page["conclusion_conformite_prelevement"]]);
+
+                        $queryResultat->execute(['reference' => $page["code_prelevement"],'code_param_sandre' => $page["code_parametre"], 'code_param_siseeaux' => $page["code_parametre_se"], 'code_param_cas' => $page["code_parametre_cas"], 'libelle' => $page["libelle_parametre"], 'nature' => $page['code_type_parametre'], 'unite' => $page['libelle_unite'], 'res_libelle' => $page['resultat_alphanumerique'], 'res_brut' => $page['resultat_numerique']]);
+
+                        foreach ($page['reseaux'] ?? [] as $reseau) {
+                            $queryPrelevementReseau->execute(['reference' => $page['code_prelevement'], 'code_reseau' => $reseau['code']]);
+                        }
+
+                        $nbRequetesExecutees++;
+                        echo 'Insertion : n = ' . $nbRequetesExecutees . ' (' . round(100 * $nbRequetesExecutees / $total, 4) . "%) \n";
+                    }
+
+                    $pdo->commit();
+                    echo 'COMMIT !';
+
+                } catch (Throwable $e) {
+                    if ($pdo->inTransaction()) {
+                        $pdo->rollBack();
+                    }
+                    throw $e;
+                }
+
+
+
+                if ($nextUrl !== null) {
+                    $resultatAPI = AppelAPI::obtenirDonneesDepuisURL($nextUrl);
+                } else {
+                    break;
+                }
+            }
+
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
 }
