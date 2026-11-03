@@ -1,4 +1,7 @@
 <?php
+
+namespace EauPotable\models;
+
 final class AppelAPI{
 
     /**
@@ -12,16 +15,24 @@ final class AppelAPI{
             $url .= $p . "=" . $value ."&";
         }
         $url = substr($url,0,-1); // Enlève le '&' final
+        echo $url;
 
-        $res = file_get_contents($url);
+        return self::getDataFromRawURL($url);
+    }
 
-        return json_decode($res, true);
+    public static function getDataFromRawURL(string $url): array{
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'PHP-Script');
+        $response = curl_exec($ch);
+
+        return json_decode($response, true);
     }
 
     public static function test(): void{
-        $data = self::getData("resultats_dis", ['size' => 1, 'page' => 2, 'code_commune' => '13001']);
+        $data = self::getData("resultats_dis", ['size' => 3, 'page' => 2, 'code_commune' => '13001']);
         print_r($data);
     }
-
 
 }
