@@ -11,7 +11,7 @@ final class ReseauView
      * @param array<int, array{
      *     insee: string,
      *     nom_commune: string,
-     *     code_postal: string
+     *     departement: string
      * }> $communes
      */
     public function afficherRechercheCommune(array $communes): string
