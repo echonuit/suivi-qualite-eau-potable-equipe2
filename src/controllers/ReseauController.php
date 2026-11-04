@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace EauPotable\controllers;
 
+use EauPotable\models\ParametresModel;
 use EauPotable\models\ReseauModel;
+use EauPotable\views\ParametresView;
 use EauPotable\views\ReseauView;
 
 final class ReseauController
@@ -15,10 +17,12 @@ final class ReseauController
     */
     public function executer(array $requete): string
     {
-        $modele = new ReseauModel();
-        $vue = new ReseauView();
+        $reseauModele = new ReseauModel();
+        $reseauVue = new ReseauView();
+        $paramModele = new ParametresModel();
+        $paramVue = new ParametresView();
 
-        $communes = $modele->getToutesLesCommunes();
+        $communes = $reseauModele->getToutesLesCommunes();
 
         $selectionCommune = trim((string) ($requete['commune'] ?? ''));
         $communeSelectionnee = null;
@@ -33,14 +37,14 @@ final class ReseauController
 
         // si l'utilisateur n'a pas sélectionné la commune : on affiche le choix des communes
         if ($communeSelectionnee === null) {
-            return $vue->afficherRechercheCommune($communes);
+            return $reseauVue->afficherRechercheCommune($communes);
         }
 
-        $reseaux = $modele->getReseauxLieesAuCommune($communeSelectionnee['insee']);
+        $reseaux = $reseauModele->getReseauxLieesAuCommune($communeSelectionnee['insee']);
 
         // si aucun réseau est lié à la commune sélectionnée
         if (count($reseaux) === 0) {
-            return $vue->afficherAucunReseau($communeSelectionnee);
+            return $reseauVue->afficherAucunReseau($communeSelectionnee);
         }
 
         // on récupère le réseau sélectionné par l'utilisateur
@@ -51,23 +55,23 @@ final class ReseauController
             foreach ($reseaux as $reseau) {
 
                 if ($selectionReseau === $reseau['code_reseau']) {
-                    $parametres = $modele->getTousLesParametres();
-                    return $vue->afficherReseauDirect($communeSelectionnee, $reseau, $parametres);
+                    $parametres = $paramModele->getParametresLiesAuReseau($selectionReseau);
+                    return $paramVue->afficherParametres($communeSelectionnee, $reseau, $parametres);
                 }
-
             }
 
             // si reseau pas encore selectionné ou pas valide: on affiche le choix de réseau
-            return $vue->afficherOptionsReseaux($communeSelectionnee, $reseaux);
+            return $reseauVue->afficherOptionsReseaux($communeSelectionnee, $reseaux);
         }
         // si un seul réseau est lié à la commune sélectionnée
         if (count($reseaux) === 1) {
             $reseau = $reseaux[0];
-            $parametres = $modele->getTousLesParametres();
 
-            return $vue->afficherReseauDirect($communeSelectionnee, $reseau, $parametres);
+            $parametres = $paramModele->getParametresLiesAuReseau($reseau['code_reseau']);
+
+            return $paramVue->afficherParametres($communeSelectionnee, $reseau, $parametres);
         }
         //si plusieurs reseaux disponibles pour la commune selectionee
-        return $vue->afficherOptionsReseaux($communeSelectionnee, $reseaux);
+        return $reseauVue->afficherOptionsReseaux($communeSelectionnee, $reseaux);
     }
 }
