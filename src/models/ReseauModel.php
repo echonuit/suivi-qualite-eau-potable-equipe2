@@ -70,6 +70,13 @@ final class ReseauModel
         $requete->execute(['inseeCode' => $inseeCode]);
         $commune = $requete->fetch(PDO::FETCH_ASSOC);
 
-        return $commune !== false ? $commune : null;
+        if ($commune === false) {
+            return null;
+        }
+
+        return [
+            'insee' => (string) $commune['insee'],
+            'nom_commune' => (string) $commune['nom_commune']];
+
     }
 }

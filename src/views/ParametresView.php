@@ -5,21 +5,26 @@ namespace EauPotable\views;
 
 use DateTimeImmutable;
 
-//ParametresView feat:Liste des paramètres -->
-//Tous les paramètres déjà mesurés sur le réseau,
-//nombre de mesures,
-//date de la dernière,
-// fonction de recherche par nom
+// ParametresView -Liste des paramètres comporte: -->
+// Tous les paramètres déjà mesurés sur le réseau,
+// Nombre de mesures,
+// Date de la dernière,
+// Une Fonction de recherche par nom
 final class ParametresView
 {
-    // /**
-    //  * Afficher le reseau selectionné et
-    //  * afficher les paramètres mésurés associés.
-    //  *
-    //  * @param array<string, mixed> $communeSelectionnee
-    //  * @param array<string, mixed> $reseau
-    //  * @param array<int, array<string, string>> $parametres
-    //  */
+    /**
+     * Affiche la commune, le reseau selectionné, les paramètres mésurés associés
+     * et les statistiques (nombreMesures et DerniereMesure).
+     *
+     * @param array{insee: string, nom_commune: string} $communeSelectionnee
+     * @param array{code_reseau: string, nom_reseau: string, quartiers: string|null} $reseau
+     * @param array<int, array{libelle: string,code_param_sandre: string}> $parametres
+     * @param int $nombreMesures
+     * @param string|null $derniereMesure
+     *
+     * @return string
+     *
+     */
     public function afficherParametres(array $communeSelectionnee, array $reseau, array $parametres, int $nombreMesures, ?string $derniereMesure): string
     {
 
@@ -82,8 +87,15 @@ final class ParametresView
     return (new Layout("Parametres", "Page de affichage des parametres", (string) ob_get_clean()))->afficher();
     }
 
+    /**
+     * Affiche le champ de recherche des paramètres.
+     *
+     * @param array<int, array{libelle: string, code_param_sandre: string}> $parametres
+     *
+     * @return string
+     */
     public function afficherRechercheParametres(array $parametres): string
-    {// once defined the exact behavior of this method it could be  merged with afficherParametres as one
+    {// once defined the exact behavior of this method it could be merged with afficherParametres() as one
         // either way, modify to avoid double layout call... decide if one or two different forms are needed
 
         ob_start(); ?>
@@ -111,21 +123,19 @@ final class ParametresView
     }
 
     /**
-     * Affiche le nombre total de mesures effectuées pour un réseau donné
+     * Affiche le nombre total de mesures effectuées pour un réseau donné.
+     *
+     * @param int $nombreMesures
+     * @return string
      *
      */
     private function afficherNombreDeMesures(int $nombreMesures): string
     {
         ob_start(); ?>
             <p> Nombre de mesures effectuées sur ce réseau :
-
-             <?php if ($nombreMesures !== null): ?>
                 <strong>
                     <?= $this->escape($nombreMesures) ?>
                 </strong>
-            <?php else: ?>
-                <strong>Aucune mesure disponible</strong>
-            <?php endif; ?>
             </p>
 
             <?php
@@ -133,7 +143,11 @@ final class ParametresView
     }
 
     /**
-     * Affiche la date de la dernière mesure effectuée pour un réseau donné
+     * Affiche la date de la dernière mesure effectuée pour un réseau donné.
+     *
+     * @param string|null $derniereMesure
+     * @return string
+     *
      */
     private function afficherDerniereMesure(?string $derniereMesure): string
     {
@@ -158,6 +172,7 @@ final class ParametresView
      * Afficher un message si aucune mésure est trouvé pour le reseau selectioné.
      *
      * @param array<string, mixed> $reseau
+     * @return string
      */
     public function afficherAucunParametre(array $reseau): string
     {
