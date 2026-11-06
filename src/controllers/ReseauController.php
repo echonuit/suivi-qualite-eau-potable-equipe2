@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace EauPotable\controllers;
 
-use EauPotable\models\ParametresModel;
 use EauPotable\models\ReseauModel;
-use EauPotable\views\ParametresView;
 use EauPotable\views\ReseauView;
 
 final class ReseauController
@@ -17,12 +15,10 @@ final class ReseauController
     */
     public function executer(array $requete): string
     {
-        $reseauModele = new ReseauModel();
-        $reseauVue = new ReseauView();
-        $paramModele = new ParametresModel();
-        $paramVue = new ParametresView();
+        $modele = new ReseauModel();
+        $vue = new ReseauView();
 
-        $communes = $reseauModele->getToutesLesCommunes();
+        $communes = $modele->getToutesLesCommunes();
 
         $selectionCommune = trim((string) ($requete['commune'] ?? ''));
         $communeSelectionnee = null;
@@ -37,41 +33,54 @@ final class ReseauController
 
         // si l'utilisateur n'a pas sélectionné la commune : on affiche le choix des communes
         if ($communeSelectionnee === null) {
-            return $reseauVue->afficherRechercheCommune($communes);
+            return $vue->afficherRechercheCommune($communes);
         }
 
-        $reseaux = $reseauModele->getReseauxLieesAuCommune($communeSelectionnee['insee']);
+        $reseaux = $modele->getReseauxLieesAuCommune($communeSelectionnee['insee']);
 
         // si aucun réseau est lié à la commune sélectionnée
-        if (count($reseaux) === 0) {
-            return $reseauVue->afficherAucunReseau($communeSelectionnee);
+        if (empty($reseaux)) { //count($reseaux) === 0
+            return $vue->afficherAucunReseau($communeSelectionnee);
         }
 
         // on récupère le réseau sélectionné par l'utilisateur
         $selectionReseau = trim((string) ($requete['reseau'] ?? ''));
 
-        // valider que le reseau selectioné correspond à la commune souhaitée
-        if ($selectionReseau !== '') {
-            foreach ($reseaux as $reseau) {
+        // si un seul réseau est lié à la commune sélectionnée --- selection directe automatique
+        if (count($reseaux) === 1) {
+            $reseauSelectionne  = $reseaux[0];
+        } else { //si plusieurs reseaux disponibles pour la commune selectionee
 
+            if ($selectionReseau === '') {//
+                return $vue->afficherOptionsReseaux($communeSelectionnee, $reseaux);
+
+            }
+
+            // valider que le reseau selectioné correspond à la commune souhaitée
+            $reseauSelectionne = null;
+
+            foreach ($reseaux as $reseau) {
                 if ($selectionReseau === $reseau['code_reseau']) {
-                    $parametres = $paramModele->getParametresLiesAuReseau($selectionReseau);
-                    return $paramVue->afficherParametres($communeSelectionnee, $reseau, $parametres);
+                    $reseauSelectionne = $reseau;
+                    break;
                 }
             }
 
             // si reseau pas encore selectionné ou pas valide: on affiche le choix de réseau
-            return $reseauVue->afficherOptionsReseaux($communeSelectionnee, $reseaux);
+            if ($reseauSelectionne === null) {
+                return $vue->afficherOptionsReseaux($communeSelectionnee, $reseaux);
+            }
         }
-        // si un seul réseau est lié à la commune sélectionnée
-        if (count($reseaux) === 1) {
-            $reseau = $reseaux[0];
 
-            $parametres = $paramModele->getParametresLiesAuReseau($reseau['code_reseau']);
+        //si on selectionne le reseau automatiquement,
+        //on redirige vers la page parametres directment avec les valeurs necessaires
+        $url = '/parametres?' . http_build_query([
+            'commune' => $communeSelectionnee['insee'],
+            'reseau' => $reseauSelectionne['code_reseau'],
+        ]);
 
-            return $paramVue->afficherParametres($communeSelectionnee, $reseau, $parametres);
-        }
-        //si plusieurs reseaux disponibles pour la commune selectionee
-        return $reseauVue->afficherOptionsReseaux($communeSelectionnee, $reseaux);
+        header('Location:' . $url, true, 303);
+        exit;
+        // return '';
     }
 }
