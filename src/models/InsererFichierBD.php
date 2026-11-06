@@ -181,7 +181,7 @@ final class InsererFichierBD
             $nbRequetesExecutees = 0;
             $total = $resultatAPI['count'] ?? null;
 
-            if(is_null($total)){
+            if (is_null($total)) {
                 die("\nPas de données !");
             }
 
