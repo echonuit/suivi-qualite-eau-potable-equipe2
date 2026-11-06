@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace EauPotable\views;
 
+use DateTimeImmutable;
+
 //ParametresView feat:Liste des paramètres -->
 //Tous les paramètres déjà mesurés sur le réseau,
 //nombre de mesures,
@@ -18,7 +20,7 @@ final class ParametresView
     //  * @param array<string, mixed> $reseau
     //  * @param array<int, array<string, string>> $parametres
     //  */
-    public function afficherParametres(array $communeSelectionnee, array $reseau, array $parametres): string
+    public function afficherParametres(array $communeSelectionnee, array $reseau, array $parametres, int $nombreMesures, ?string $derniereMesure): string
     {
 
         ob_start(); ?>
@@ -69,6 +71,13 @@ final class ParametresView
             <button type="submit">Filtrer résultats</button>
         </form>
 
+        <div>
+            <p>
+                <?= $this->afficherNombreDeMesures($nombreMesures) ?>
+                <?= $this->afficherDerniereMesure($derniereMesure) ?>
+            </p>
+        </div>
+
         <?php
     return (new Layout("Parametres", "Page de affichage des parametres", (string) ob_get_clean()))->afficher();
     }
@@ -101,27 +110,49 @@ final class ParametresView
         return (new Layout('Parametres', 'Page de affichage des parametres', (string) ob_get_clean()))->afficher();
     }
 
-    //     /**
-    //      * displays the total number of measurements done for a given network
-    //      * this function gets its data from the ParametresModel method
-    //      * public function getNombreDesMesuresLieesAuReseau(string $inputCodeReseau): int{
-    //      *      $requete = $this->pdo->prepare("SELECT COUNT(rp.code_reseau) ...
-    //      */
-    //      private function afficherNombreDeMesures(array $nombreMesures): string
-    //     {
-    //          TODO
-    //     }
+    /**
+     * Affiche le nombre total de mesures effectuées pour un réseau donné
+     *
+     */
+    private function afficherNombreDeMesures(int $nombreMesures): string
+    {
+        ob_start(); ?>
+            <p> Nombre de mesures effectuées sur ce réseau :
 
-    //     /**
-    //      * displays the date of the last measurement done for a given network
-    //      * this function gets its data from the ParametresModel method
-    //      * public function getDerniereMesureLieeAuReseau(string $inputCodeReseau): ?string{
-    //      *     $requete = $this->pdo->prepare("SELECT p.date_prelevement ...
-    //      */
-    //     private function afficherDerniereMesure(array $derniereMesure): string
-    //     {
-    //          TODO
-    //     }
+             <?php if ($nombreMesures !== null): ?>
+                <strong>
+                    <?= $this->escape($nombreMesures) ?>
+                </strong>
+            <?php else: ?>
+                <strong>Aucune mesure disponible</strong>
+            <?php endif; ?>
+            </p>
+
+            <?php
+        return (string) ob_get_clean();
+    }
+
+    /**
+     * Affiche la date de la dernière mesure effectuée pour un réseau donné
+     */
+    private function afficherDerniereMesure(?string $derniereMesure): string
+    {
+
+        ob_start(); ?>
+            <p> Dernière mesure sur ce réseau :
+
+             <?php if ($derniereMesure !== null): ?>
+                <strong>
+                    <?= $this->escape((new DateTimeImmutable($derniereMesure))->format('d/m/Y')) ?>
+                </strong>
+            <?php else: ?>
+                <strong>Aucune mesure disponible</strong>
+            <?php endif; ?>
+            </p>
+
+            <?php
+        return (string) ob_get_clean();
+    }
 
     /**
      * Afficher un message si aucune mésure est trouvé pour le reseau selectioné.

@@ -10,9 +10,9 @@ use EauPotable\views\ReseauView;
 final class ReseauController
 {
     /**
-    * @param array<string, mixed> $requete
-    * @return string
-    */
+     * @param array<string, mixed> $requete
+     * @return string
+     */
     public function executer(array $requete): string
     {
         $modele = new ReseauModel();
@@ -24,7 +24,6 @@ final class ReseauController
         $communeSelectionnee = null;
 
         foreach ($communes as $commune) {
-
             if ($selectionCommune === $commune['insee']) {
                 $communeSelectionnee = $commune;
                 break;
@@ -39,26 +38,24 @@ final class ReseauController
         $reseaux = $modele->getReseauxLieesAuCommune($communeSelectionnee['insee']);
 
         // si aucun réseau est lié à la commune sélectionnée
-        if (empty($reseaux)) { //count($reseaux) === 0
+        if (empty($reseaux)) { //$reseaux === []
             return $vue->afficherAucunReseau($communeSelectionnee);
         }
 
         // on récupère le réseau sélectionné par l'utilisateur
         $selectionReseau = trim((string) ($requete['reseau'] ?? ''));
+        $reseauSelectionne = null;
 
         // si un seul réseau est lié à la commune sélectionnée --- selection directe automatique
         if (count($reseaux) === 1) {
-            $reseauSelectionne  = $reseaux[0];
+            $reseauSelectionne = $reseaux[0];
         } else { //si plusieurs reseaux disponibles pour la commune selectionee
 
-            if ($selectionReseau === '') {//
+            if ($selectionReseau === '') {
                 return $vue->afficherOptionsReseaux($communeSelectionnee, $reseaux);
-
             }
 
             // valider que le reseau selectioné correspond à la commune souhaitée
-            $reseauSelectionne = null;
-
             foreach ($reseaux as $reseau) {
                 if ($selectionReseau === $reseau['code_reseau']) {
                     $reseauSelectionne = $reseau;
@@ -79,8 +76,7 @@ final class ReseauController
             'reseau' => $reseauSelectionne['code_reseau'],
         ]);
 
-        header('Location:' . $url, true, 303);
+        header('Location: ' . $url, true, 303);
         exit;
-        // return '';
     }
 }

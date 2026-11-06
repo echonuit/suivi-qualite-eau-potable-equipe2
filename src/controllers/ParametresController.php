@@ -21,9 +21,13 @@ final class ParametresController
         $reseauModele = new ReseauModel();
         $vue = new ParametresView();
 
+
         // on récupère le réseau et commune sélectionnés par l'utilisateur dans l'url
         $codeReseauSelection = trim((string) ($requete['reseau'] ?? ''));
         $codeCommuneSelection = trim((string) ($requete['commune'] ?? ''));
+
+        $derniereMesure = $parametresModele->getDerniereMesureLieeAuReseau($codeReseauSelection);
+        $nombreMesures = $parametresModele->getNombreDesMesuresLieesAuReseau($codeReseauSelection);
 
         if ($codeReseauSelection === '' || $codeCommuneSelection === '') {
             http_response_code(400);
@@ -61,6 +65,6 @@ final class ParametresController
         }
 
         // Temporaire car: duplication de partie layout de ces methodes
-        return $vue->afficherRechercheParametres($parametres) . $vue-> afficherParametres($communeSelectionnee, $reseauSelectionne, $parametres);
+        return $vue->afficherRechercheParametres($parametres) . $vue-> afficherParametres($communeSelectionnee, $reseauSelectionne, $parametres, $nombreMesures, $derniereMesure);
     }
 }
