@@ -147,12 +147,13 @@ final class InsererFichierBD
 
     /**
      * @param string $annee L'année des prélèvements à inserer
+     * @param string $mois Le mois des prélèvements à insérer
      * @param int $codeParam Le code paramètre Sise-Eaux à insérer (ex. 1340 = Nitrates)
      *
      * Insère les données de l'API Hubeau dans la BD (tables: prelevement, reseau_prelevement, resultat) provenant de l'année donnée.
      * L'insertion est fragmentée en années pour limiter la taille des importations et éviter de gérer des millions de tuples d'un coup.
     */
-    public static function insererPrelevement(string $annee, int $codeParam): void
+    public static function insererPrelevement(string $annee, string $mois, int $codeParam): void
     {
         $pdo = Connexion::ouvrir();
 
@@ -175,10 +176,14 @@ final class InsererFichierBD
                 ON CONFLICT (reference, code_reseau) DO NOTHING',
             );
 
-            $resultatAPI = AppelAPI::obtenirDonnees('resultats_dis', ['date_max_prelevement' => $annee . "-12-31",'date_min_prelevement' => $annee . "-01-01",'size' => 5000, "code_parametre" => $codeParam]);
+            $resultatAPI = AppelAPI::obtenirDonnees('resultats_dis', ['date_max_prelevement' => $annee . "-" . $mois . "-31",'date_min_prelevement' => $annee . "-" . $mois . "-01",'size' => 5000, "code_parametre" => $codeParam]);
 
             $nbRequetesExecutees = 0;
-            $total = $resultatAPI['count'];
+            $total = $resultatAPI['count'] ?? null;
+
+            if(is_null($total)){
+                die("\nPas de données !");
+            }
 
             while (true) {
 
