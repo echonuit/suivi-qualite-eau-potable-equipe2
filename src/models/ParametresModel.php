@@ -15,16 +15,16 @@ final class ParametresModel
     }
 
 
-    /**
-     * Récupère les paramètres mesurés (tous les paramètres disponibles)
-     * pour le réseau selectionné par l'utilisateur (d'après son code_reseau)
-     *
-     * @return array<int, array{
-     *     libelle: string,
-     *     code_param_sandre: string
-     * }>
-     */
-    public function getParametresLiesAuReseau(string $inputCodeReseau): array
+    // /**
+    //  * Récupère les paramètres mesurés (tous les paramètres disponibles)
+    //  * pour le réseau selectionné par l'utilisateur (d'après son code_reseau)
+    //  *
+    //  * @return array<int, array{
+    //  *     libelle: string,
+    //  *     code_param_sandre: string
+    //  * }>
+    //  */
+    public function getParametresLiesAuReseau(string $inputCodeReseau, string $rechercheParam = ''): array
     {
         $requete = $this->pdo->prepare(
             "SELECT DISTINCT r.libelle, r.code_param_sandre
@@ -32,17 +32,24 @@ final class ParametresModel
             JOIN schema.prelevement p ON rp.reference = p.reference
             JOIN schema.resultat r ON r.reference = p.reference
             WHERE rp.code_reseau = :code_reseau
+            AND r.libelle ILIKE :rechercheParam
             -- Jusqu'ici, nous obtenons tous les paramètres mesurés pour ce réseau
             --> si on veut ajouter le choix-de-periode, alors on peut ajouter:
 	            -- AND (p.date_prelevement BETWEEN :datePeriodeInf AND :datePeriodeSup )
 	            -- GROUP BY p.reference, r.libelle, r.code_param_sandre
-    ORDER BY r.libelle ASC",
+                -- ou ajouter une autre requete ailleurs dans un autre MesuresModel dedie
+            ORDER BY r.libelle ASC",
         );
-        // if (datePeriodeSup == null){
+        //--et pour valider, quelquechose comme:
+        // if (datePeriodeSup === null){
         //     datePeriodeSup = date(YYYY-MM-dd, current_date());
 
-        $requete->execute(['code_reseau' => $inputCodeReseau]);
+        $requete->execute([
+            'code_reseau' => $inputCodeReseau,
+            'rechercheParam' => $rechercheParam . '%' ]);
+        //'rechercheParam' => $recherche === '' ? '%': $rechercheParam . '%'
         return $requete->fetchAll(PDO::FETCH_ASSOC);
+
     }
 
     /**
