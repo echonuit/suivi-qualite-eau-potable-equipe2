@@ -12,21 +12,40 @@ use DateTimeImmutable;
 // Une Fonction de recherche par nom
 final class ParametresView
 {
-    /**
-     * Affiche la commune, le reseau selectionné, les paramètres mésurés associés
-     * et les statistiques (nombreMesures et DerniereMesure).
-     *
-     * @param array{insee: string, nom_commune: string} $communeSelectionnee
-     * @param array{code_reseau: string, nom_reseau: string, quartiers: string|null} $reseau
-     * @param array<int, array{libelle: string,code_param_sandre: string}> $parametres
-     * @param int $nombreMesures
-     * @param string|null $derniereMesure
-     *
-     * @return string
-     *
-     */
-    public function afficherParametres(array $communeSelectionnee, array $reseau, array $parametres, int $nombreMesures, ?string $derniereMesure): string
-    {
+    // /**
+    //  * Affiche la commune, le reseau selectionné, les paramètres mésurés associés
+    //  * et les statistiques (nombreMesures et DerniereMesure).
+    //  *
+    //  * @param array{insee: string, nom_commune: string} $communeSelectionnee
+    //  * @param array{code_reseau: string, nom_reseau: string, quartiers: string|null} $reseau
+    //  * @param array<int, array{libelle: string,code_param_sandre: string}> $parametres
+    //  * @param int $nombreMesures
+    //  * @param string|null $derniereMesure
+    //  *
+    //  * @return string
+    //  *
+    //  */
+    public function afficherParametres(
+        array $communeSelectionnee,
+        array $reseau,
+        array $parametres,
+        array $parametresSelectionnes,
+        int $nombreMesures,
+        ?string $derniereMesure,
+    ): string {
+
+        // On evite d'afficher les suggestions de parametres deja selectionnes par l'utilisateur
+        $codesSelectionnes = array_fill_keys($parametresSelectionnes, true);
+
+        $parametresNonSelectionnes = [];
+
+        foreach ($parametres as $parametre) {
+            $code = $parametre['code_param_sandre'];
+
+            if (!isset($codesSelectionnes[$code])) {
+                $parametresNonSelectionnes[] = $parametre;
+            }
+        }
 
         ob_start(); ?>
 
@@ -50,76 +69,145 @@ final class ParametresView
         <br><br>
 
         <!-- Affichage partie parametres -->
-        <h2>Choisir les paramètres mesurés : </h2>
+        <div class="parametres-layout">
 
-        <form method="GET" action="/parametres" >
+            <!-- Section de selection de parametres: à placer à GAUCHE (CSS) -->
+            <section class="selection-parametres">
 
-            <!-- Permet de garder le code insee de la commune entre requetes -->
-            <input type="hidden" name="commune"
-                    value="<?= $this->escape($communeSelectionnee['insee']) ?>">
-            <!-- Permet de garder le code reseau entre requetes -->
-            <input type="hidden" name="reseau"
-                    value="<?= $this->escape($reseau['code_reseau']) ?>" >
+                <h2>Choisir les paramètres mesurés : </h2>
+                <form method="GET"
+                      action="/reseau/<?= rawurlencode($reseau['code_reseau']) ?>"
+                      id="formParametres"
+                >
 
-            <?php foreach ($parametres as $parametre): ?>
+                    <!-- Permet de garder le code insee de la commune entre requetes -->
+                    <input type="hidden" name="commune"
+                            value="<?= $this->escape($communeSelectionnee['insee']) ?>">
+
+                    <!-- Permet de garder les parametres selectionnes -->
+                    <input  type="hidden" name="parametres" id="parametresSelectionnes"
+                            value="<?= $this->escape(implode(',', $parametresSelectionnes)) ?>"
+                    >
+
+                    <!-- Affiche champ de recherche -->
+                    <?= $this->afficherRechercheParametres($parametresNonSelectionnes) ?>
+
+                    <hr>
+
+                    <!-- Affichage de tous le parametres disponibles -->
+                    <h3>Tous les paramètres mesurés sur ce réseau :</h3>
+
+                        <?php foreach ($parametres as $parametre): ?>
+
+                            <?php $code = $parametre['code_param_sandre']; ?>
+
+                            <div>
+                                <input type="checkbox" class="js-parametre"
+                                        id="parametre-<?= $this->escape($code) ?>"
+                                        data-code="<?= $this->escape($code) ?>"
+                                        value="<?= $this->escape($code) ?>"
+                                        <?= isset($codesSelectionnes[$code]) ? 'checked' : '' ?>
+                                >
+
+                                <label for="parametre-<?= $this->escape($code) ?>">
+                                    <?= $this->escape($parametre['libelle']) ?>
+                                </label>
+                            </div>
+
+                        <?php endforeach; ?>
+
+                        <button type="submit">Afficher les Donnees(Graph)</button>
+
+                        <a href="/reseau/<?= rawurlencode($reseau['code_reseau']) ?>?commune=<?= rawurlencode($communeSelectionnee['insee']) ?>">
+                            Réinitialiser
+                        </a>
+
+                </form>
+
                 <div>
-                    <input type="checkbox" id="parametre-<?= $this->escape($parametre['code_param_sandre']) ?>"
-                            name="parametres[]"
-                            value="<?= $this->escape($parametre['code_param_sandre']) ?>" >
-
-                    <label for="parametre-<?= $this->escape($parametre['code_param_sandre']) ?>">
-                        <?= $this->escape($parametre['libelle']) ?>
-                    </label>
+                    <p>
+                        <?= $this->afficherNombreDeMesures($nombreMesures) ?>
+                        <?= $this->afficherDerniereMesure($derniereMesure) ?>
+                    </p>
                 </div>
-            <?php endforeach; ?>
 
-            <button type="submit">Filtrer résultats</button>
-        </form>
+            </section>
 
-        <div>
-            <p>
-                <?= $this->afficherNombreDeMesures($nombreMesures) ?>
-                <?= $this->afficherDerniereMesure($derniereMesure) ?>
-            </p>
+            <hr>
+
+            <!-- Section d'affichage de donnees: à placer à DROITE (CSS) -->
+
+            <section class="resultats-parametres">
+                <!-- TODO: ajouter code HTML correspondant ou
+                 appel à private function afficherResultats()/afficherGraph() -->
+
+                 <!-- REMARQUE: Pour l'instant, ce code sert uniquement à des fins de TEST et affiche des placeholders... -->
+                  <h2>Données des paramètres sélectionnés</h2>
+
+                    <?php if ($parametresSelectionnes === []): ?>
+
+                        <p>Veuillez sélectionner au moins un paramètre.</p>
+
+                    <?php else: ?>
+
+                        <?php foreach ($parametres as $parametre): ?>
+
+                            <?php if (isset($codesSelectionnes[$parametre['code_param_sandre']])): ?>
+
+                                <h3><?= $this->escape($parametre['libelle']) ?></h3>
+
+                                <p>
+                                    Les données/graph de ce paramètre seront affichées ici.
+                                </p>
+
+                            <?php endif; ?>
+
+                        <?php endforeach; ?>
+
+                    <?php endif; ?>
+            </section>
+
         </div>
 
-        <?php
-    return (new Layout("Parametres", "Page de affichage des parametres", (string) ob_get_clean()))->afficher();
+    <script src="/js/rechercheParametres.js" defer></script>
+
+    <?php
+    return (new Layout("Parametres", "Page d'affichage des parametres", (string) ob_get_clean()))->afficher();
     }
 
-    /**
-     * Affiche le champ de recherche des paramètres.
-     *
-     * @param array<int, array{libelle: string, code_param_sandre: string}> $parametres
-     *
-     * @return string
-     */
-    public function afficherRechercheParametres(array $parametres): string
-    {// once defined the exact behavior of this method it could be merged with afficherParametres() as one
-        // either way, modify to avoid double layout call... decide if one or two different forms are needed
+    // /**
+    //  * Affiche le champ de recherche des paramètres.
+    //  *
+    //  * @param array<int, array{libelle: string, code_param_sandre: string}> $parametres
+    //  *
+    //  * @return string
+    //  */
+    private function afficherRechercheParametres(array $parametresNonSelectionnes): string
+    {
 
         ob_start(); ?>
 
-        <form method="GET" action="/parametres">
-            <label for="choix-parametre">Rechercher un parametre :</label>
+            <label for="rechercheParam">Rechercher un parametre :</label>
             <input
-                type="text" id="choix-parametre" list="liste-parametres"
-                placeholder="Saisir le nom d'un parametre..." autocomplete="off" required >
+                type="text" id="rechercheParam" list="listeParametres"
+                placeholder="Saisir le nom d'un parametre..."
+                autocomplete="off">
 
-            <datalist id="liste-parametres">
-                <?php foreach ($parametres as $parametre): ?>
-                    <option
-                        value="<?= $this->escape($parametre['libelle']) ?>"
-                        data-insee="<?= $this->escape($parametre['code_param_sandre']) ?>" >
+            <button type="button" id="selectionnerParametre">Selectionner parametre</button>
+
+            <!-- Affichage de suggestions des parametres recherches -->
+            <datalist id="listeParametres">
+
+                <?php foreach ($parametresNonSelectionnes as $parametre): ?>
+                    <option value="<?= $this->escape($parametre['libelle']) ?>"
+                            data-code="<?= $this->escape($parametre['code_param_sandre']) ?>">
                     </option>
-                    <?php endforeach; ?>
+                <?php endforeach; ?>
+
             </datalist>
-            <input type="hidden" name="parametre" id="code-sandre-parametre">
-            <button type="submit">Chercher</button>
-        </form>
 
         <?php
-        return (new Layout('Parametres', 'Page de affichage des parametres', (string) ob_get_clean()))->afficher();
+        return  (string) ob_get_clean();
     }
 
     /**

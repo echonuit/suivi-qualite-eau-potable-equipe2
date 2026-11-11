@@ -22,9 +22,9 @@ final class ParametresController
         $vue = new ParametresView();
 
 
-        // on récupère le réseau et commune sélectionnés par l'utilisateur dans l'url
-        $codeReseauSelection = trim((string) ($requete['reseau'] ?? ''));
+        // on récupère le parametre recherché et le réseau et commune sélectionnés par l'utilisateur dans l'url
         $codeCommuneSelection = trim((string) ($requete['commune'] ?? ''));
+        $codeReseauSelection = trim((string) ($requete['reseau'] ?? ''));
 
         $derniereMesure = $parametresModele->getDerniereMesureLieeAuReseau($codeReseauSelection);
         $nombreMesures = $parametresModele->getNombreDesMesuresLieesAuReseau($codeReseauSelection);
@@ -57,6 +57,7 @@ final class ParametresController
             return 'Réseau non trouvé pour la commune selectionnée.';
         }
 
+        // deuxième argument possède valeur par défaut de'' (string $rechercheParam = ''), donc il reste simplement vide lors de cet appel...
         $parametres = $parametresModele->getParametresLiesAuReseau($codeReseauSelection);
 
         //si aucun prélèvement est associé au réseau selectionné
@@ -64,7 +65,36 @@ final class ParametresController
             return $vue->afficherAucunParametre($reseauSelectionne);
         }
 
-        // Temporaire car: duplication de partie layout de ces methodes
-        return $vue->afficherRechercheParametres($parametres) . $vue-> afficherParametres($communeSelectionnee, $reseauSelectionne, $parametres, $nombreMesures, $derniereMesure);
+        $codesParamDisponibles = [];
+
+        // on vérifie que le paramètre est disponible sur le réseau,
+        // et on crée un tableau de paires clé-valeur, comme 'code' => true,
+        // pour vérifier ultérieurement avec isset().
+        foreach ($parametres as $parametre) {
+            $codesParamDisponibles[$parametre['code_param_sandre']] = true;
+        }
+
+        $parametresLiesBruts = $requete['parametres'] ?? '';
+
+        if (is_string($parametresLiesBruts)) {
+            // format d'url parametres=1340,1302...
+            $codesSelectionnes = $parametresLiesBruts === '' ? [] : explode(',', $parametresLiesBruts);
+        } elseif (is_array($parametresLiesBruts)) {
+            $codesSelectionnes = $parametresLiesBruts;
+        } else {
+            $codesSelectionnes = [];
+        }
+
+        $selectionDeParametres = [];
+
+        foreach ($codesSelectionnes as $codeParam) {
+            if (is_string($codeParam) && isset($codesParamDisponibles[$codeParam])) {
+                $selectionDeParametres[$codeParam] = true;
+            }
+        }
+
+        $parametresSelectionnes = array_keys($selectionDeParametres);
+
+        return $vue-> afficherParametres($communeSelectionnee, $reseauSelectionne, $parametres, $parametresSelectionnes, $nombreMesures, $derniereMesure);
     }
 }
