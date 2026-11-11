@@ -8,6 +8,8 @@ declare(strict_types=1);
 use EauPotable\controllers\AccueilController;
 use EauPotable\controllers\ParametresController;
 use EauPotable\controllers\ReseauController;
+use EauPotable\controllers\GraphiqueController;
+
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
