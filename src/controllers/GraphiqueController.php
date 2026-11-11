@@ -53,14 +53,4 @@ final class GraphiqueController
         );
     }
 
-    public function executerPage(array $requete): string
-    {
-        $contenu = $this->executer($requete);
-
-        return (new Layout(
-            'Graphique',
-            'Évolution des mesures du réseau',
-            $contenu
-        ))->afficher();
-    }
 }
