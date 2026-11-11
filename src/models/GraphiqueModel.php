@@ -34,30 +34,32 @@ final class GraphiqueModel
         return (string) $date;
     }
 
-    public function getMesuresParMois(string $codeReseau, string $debut, string $fin): array
+    public function getMesures(string $codeReseau, string $codeParam, string $debut, string $fin): array
     {
         $sql = "SELECT
-                    TO_CHAR(DATE_TRUNC('month', p.date_prelevement), 'YYYY-MM') AS mois,
-                    COUNT(*) AS nombre
+                    TO_CHAR(p.date_prelevement, 'YYYY-MM-DD') AS date_prelevement,
+                    r.res_brut AS valeur
                 FROM schema.reseau_prelevement rp
                 JOIN schema.prelevement p ON rp.reference = p.reference
+                JOIN schema.resultat r ON r.reference = p.reference
                 WHERE rp.code_reseau = :code_reseau
                   AND p.date_prelevement >= :debut
                   AND p.date_prelevement <= :fin
-                GROUP BY DATE_TRUNC('month', p.date_prelevement)
-                ORDER BY DATE_TRUNC('month', p.date_prelevement)";
+                  AND r.code_param_sandre = :code_param
+                ORDER BY p.date_prelevement";
 
         $requete = $this->pdo->prepare($sql);
         $requete->execute([
             'code_reseau' => $codeReseau,
             'debut' => $debut,
             'fin' => $fin,
+            'code_param' => $codeParam,
         ]);
 
         return array_map(
             static fn(array $ligne): array => [
-                'mois' => (string) $ligne['mois'],
-                'nombre' => (int) $ligne['nombre'],
+                'date' => (string) $ligne['date_prelevement'],
+                'valeur' => (float) $ligne['valeur'],
             ],
             $requete->fetchAll(PDO::FETCH_ASSOC)
         );

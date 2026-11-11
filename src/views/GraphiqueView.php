@@ -8,16 +8,15 @@ use DateTimeImmutable;
 
 final class GraphiqueView
 {
-    public function afficher(array $commune, array $reseau, array $mesures): string
+    public function afficher(array $mesures): string
     {
-        $donnees = $this->completerMois($mesures);
+        $donnees = $this->completerDate($mesures);
 
         ob_start();
         ?>
         <section class="graphique-reseau">
-            <h2>Mesures par mois</h2>
-
-            <?php if ($donnees === [] || array_sum(array_column($donnees, 'nombre')) === 0): ?>
+            <?php if ($donnees === [] || array_sum(array_column($donnees, 'valeur')) === 0): 
+                print_r($donnees)?>
                 <p>Aucune mesure.</p>
             <?php else: ?>
                 <?= $this->dessinerGraphique($donnees) ?>
@@ -29,31 +28,31 @@ final class GraphiqueView
     }
 
     // Si le mois n'a pas de prélèvement
-    private function completerMois(array $mesures): array
+    private function completerDate(array $mesures): array
     {
         if ($mesures === []) {
             return [];
         }
 
-        $parMois = [];
+        $parJour = [];
         foreach ($mesures as $ligne) {
-            $parMois[$ligne['mois']] = $ligne['nombre'];
+            $parJour[$ligne['date']] = $ligne['valeur'];
         }
 
-        $premierMois = new DateTimeImmutable(array_key_first($parMois) . '-01');
-        $dernierMois = new DateTimeImmutable(array_key_last($parMois) . '-01');
+        $premiereDate = new DateTimeImmutable(array_key_first($parJour));
+        $derniereDate = new DateTimeImmutable(array_key_last($parJour));
 
         $donnees = [];
 
-        while ($premierMois <= $dernierMois) {
-            $mois = $premierMois->format('Y-m');
+        while ($premiereDate <= $derniereDate) {
+            $date = $premiereDate->format('Y-m-d');
 
             $donnees[] = [
-                'mois' => $mois,
-                'nombre' => $parMois[$mois] ?? 0,
+                'date' => $date,
+                'valeur' => $parJour[$date] ?? 0,
             ];
 
-            $premierMois = $premierMois->modify('+1 month');
+            $premiereDate = $premiereDate->modify('+1 day');
         }
 
         return $donnees;
@@ -69,7 +68,7 @@ final class GraphiqueView
         $haut = 25;
         $bas = $hauteur - 65;
 
-        $maximum = max(array_column($donnees, 'nombre'));
+        $maximum = max(array_column($donnees, 'valeur'));
         $maximum = max(1, (int) ceil($maximum * 1.1));
 
         $nombrePoints = count($donnees);
@@ -78,13 +77,13 @@ final class GraphiqueView
         $points = [];
         foreach ($donnees as $index => $ligne) {
             $x = $gauche + ($index * $ecartX);
-            $y = $bas - (($ligne['nombre'] / $maximum) * ($bas - $haut));
+            $y = $bas - (($ligne['valeur'] / $maximum) * ($bas - $haut));
 
             $points[] = [
                 'x' => $x,
                 'y' => $y,
-                'mois' => $ligne['mois'],
-                'nombre' => $ligne['nombre'],
+                'date' => $ligne['date'],
+                'valeur' => $ligne['valeur'],
             ];
         }
 
@@ -142,11 +141,11 @@ final class GraphiqueView
                     <text x="<?= round($point['x'], 1) ?>"
                           y="<?= $bas + 20 ?>"
                           text-anchor="middle" font-size="11" fill="#000">
-                        <?= $this->nomMois($point['mois']) ?>
+                        <?= $this->nomMois($point['date']) ?>
                     </text>
                 <?php endforeach; ?>
             </svg>
-            <figcaption>Nombre de prélèvements par mois</figcaption>
+            <figcaption>Valeur du paramètre à chaque prélèvement</figcaption>
         </figure>
         <?php
 

@@ -156,10 +156,6 @@ final class ParametresView
 
                                 <h3><?= $this->escape($parametre['libelle']) ?></h3>
 
-                                <p>
-                                    Les données/graph de ce paramètre seront affichées ici.
-                                </p>
-
                             <?php endif; ?>
 
                         <?php endforeach; ?>

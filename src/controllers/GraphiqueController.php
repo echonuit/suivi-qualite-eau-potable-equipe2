@@ -8,7 +8,6 @@ use DateTimeImmutable;
 use EauPotable\models\GraphiqueModel;
 use EauPotable\models\ReseauModel;
 use EauPotable\views\GraphiqueView;
-use EauPotable\views\Layout;
 
 final class GraphiqueController
 {
@@ -34,23 +33,20 @@ final class GraphiqueController
             }
         }
         if ($derniereDate === null) {
-            return (new GraphiqueView())->afficher($commune, $reseauSelectionne, []);
+            return (new GraphiqueView())->afficher([]);
         }
 
         $fin = new DateTimeImmutable($derniereDate);
         $debut = $fin->modify('-12 months');
 
-        $mesures = $graphiqueModele->getMesuresParMois(
+        $mesures = $graphiqueModele->getMesures(
             $codeReseau,
+            "1340",
             $debut->format('Y-m-d'),
             $fin->format('Y-m-d')
         );
 
-        return (new GraphiqueView())->afficher(
-            $commune,
-            $reseauSelectionne,
-            $mesures
-        );
+        return (new GraphiqueView())->afficher($mesures);
     }
 
 }
