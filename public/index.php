@@ -13,15 +13,23 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 $chemin = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $requete = $_GET;
-// Ajoutez vos pages ici, une ligne par adresse. Les adresses de ce projet portent
-// toute la vue (/reseau/013000618?parametres=1340) : concevez leur schéma d'abord.
-$page = match ($chemin) {
-    '/' => (new AccueilController())->executer(),
-    '/reseau' => (new ReseauController())->executer($requete),
-    '/parametres' => (new ParametresController())->executer($requete),
-    default => null,
-};
 
+if (preg_match('#^/reseau/([^/]+)/?$#', $chemin, $matches) === 1) {
+
+    $requete['reseau'] = rawurldecode($matches[1]);
+    $page = (new ParametresController())->executer($requete);
+
+} else {
+
+    // Ajoutez vos pages ici, une ligne par adresse. Les adresses de ce projet portent
+    // toute la vue (/reseau/013000618?parametres=1340) : concevez leur schéma d'abord.
+    $page = match ($chemin) {
+        '/' => (new AccueilController())->executer(),
+        '/reseau' => (new ReseauController())->executer($requete),
+        '/parametres' => (new ParametresController())->executer($requete),
+        default => null,
+    };
+}
 if ($page === null) {
     http_response_code(404);
     $page = 'Page introuvable.';
