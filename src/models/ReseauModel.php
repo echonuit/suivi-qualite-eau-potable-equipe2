@@ -55,10 +55,28 @@ final class ReseauModel
         return $requete->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Fonction temporaire seulement pour tester le choix du reseau, à faire ici ou dans sa propre classe ailleurs
-    public function getTousLesParametres(): string
+    /**
+     * @return array{insee: string, nom_commune: string}|null
+     * }>
+     */
+    public function getCommuneParCodeInsee(string $inseeCode): ?array
     {
-        $parametres = "A FAIRE: Parametres --> La page du réseau affiche à gauche la liste de tous les PARAMETRES déjà mesurés, GROUPES par famille, avec un CHAMP DE RECHERCHE.";
-        return $parametres;
+        $requete = $this->pdo->prepare(
+            "SELECT insee, nom_commune
+            FROM schema.commune
+            WHERE insee = :inseeCode",
+        );
+
+        $requete->execute(['inseeCode' => $inseeCode]);
+        $commune = $requete->fetch(PDO::FETCH_ASSOC);
+
+        if ($commune === false) {
+            return null;
+        }
+
+        return [
+            'insee' => (string) $commune['insee'],
+            'nom_commune' => (string) $commune['nom_commune']];
+
     }
 }

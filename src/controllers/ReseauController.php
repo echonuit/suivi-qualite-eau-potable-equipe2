@@ -10,9 +10,9 @@ use EauPotable\views\ReseauView;
 final class ReseauController
 {
     /**
-    * @param array<string, mixed> $requete
-    * @return string
-    */
+     * @param array<string, mixed> $requete
+     * @return string
+     */
     public function executer(array $requete): string
     {
         $modele = new ReseauModel();
@@ -24,7 +24,6 @@ final class ReseauController
         $communeSelectionnee = null;
 
         foreach ($communes as $commune) {
-
             if ($selectionCommune === $commune['insee']) {
                 $communeSelectionnee = $commune;
                 break;
@@ -39,35 +38,45 @@ final class ReseauController
         $reseaux = $modele->getReseauxLieesAuCommune($communeSelectionnee['insee']);
 
         // si aucun réseau est lié à la commune sélectionnée
-        if (count($reseaux) === 0) {
+        if (empty($reseaux)) { //$reseaux === []
             return $vue->afficherAucunReseau($communeSelectionnee);
         }
 
         // on récupère le réseau sélectionné par l'utilisateur
         $selectionReseau = trim((string) ($requete['reseau'] ?? ''));
+        $reseauSelectionne = null;
 
-        // valider que le reseau selectioné correspond à la commune souhaitée
-        if ($selectionReseau !== '') {
+        // si un seul réseau est lié à la commune sélectionnée --- selection directe automatique
+        if (count($reseaux) === 1) {
+            $reseauSelectionne = $reseaux[0];
+        } else { //si plusieurs reseaux disponibles pour la commune selectionee
+
+            if ($selectionReseau === '') {
+                return $vue->afficherOptionsReseaux($communeSelectionnee, $reseaux);
+            }
+
+            // valider que le reseau selectioné correspond à la commune souhaitée
             foreach ($reseaux as $reseau) {
-
                 if ($selectionReseau === $reseau['code_reseau']) {
-                    $parametres = $modele->getTousLesParametres();
-                    return $vue->afficherReseauDirect($communeSelectionnee, $reseau, $parametres);
+                    $reseauSelectionne = $reseau;
+                    break;
                 }
-
             }
 
             // si reseau pas encore selectionné ou pas valide: on affiche le choix de réseau
-            return $vue->afficherOptionsReseaux($communeSelectionnee, $reseaux);
+            if ($reseauSelectionne === null) {
+                return $vue->afficherOptionsReseaux($communeSelectionnee, $reseaux);
+            }
         }
-        // si un seul réseau est lié à la commune sélectionnée
-        if (count($reseaux) === 1) {
-            $reseau = $reseaux[0];
-            $parametres = $modele->getTousLesParametres();
 
-            return $vue->afficherReseauDirect($communeSelectionnee, $reseau, $parametres);
-        }
-        //si plusieurs reseaux disponibles pour la commune selectionee
-        return $vue->afficherOptionsReseaux($communeSelectionnee, $reseaux);
+        //si on selectionne le reseau automatiquement,
+        //on redirige vers la page parametres directment avec les valeurs necessaires
+        $url = '/parametres?' . http_build_query([
+            'commune' => $communeSelectionnee['insee'],
+            'reseau' => $reseauSelectionne['code_reseau'],
+        ]);
+
+        header('Location: ' . $url, true, 303);
+        exit;
     }
 }

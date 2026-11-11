@@ -6,6 +6,7 @@ declare(strict_types=1);
 // (voir docker/php/apache.conf). Ce fichier choisit la page à afficher, et c'est tout.
 
 use EauPotable\controllers\AccueilController;
+use EauPotable\controllers\ParametresController;
 use EauPotable\controllers\ReseauController;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
@@ -17,6 +18,7 @@ $requete = $_GET;
 $page = match ($chemin) {
     '/' => (new AccueilController())->executer(),
     '/reseau' => (new ReseauController())->executer($requete),
+    '/parametres' => (new ParametresController())->executer($requete),
     default => null,
 };
 

@@ -11,7 +11,7 @@ final class ReseauView
      * @param array<int, array{
      *     insee: string,
      *     nom_commune: string,
-     *     code_postal: string
+     *     departement: string
      * }> $communes
      */
     public function afficherRechercheCommune(array $communes): string
@@ -45,7 +45,7 @@ final class ReseauView
     }
 
     /**
-     * Afficher un message si aucune reseau et trouvé pour la commune selectionée.
+     * Afficher un message si aucune reseau est trouvé pour la commune selectionée.
      *
      * @param array<string, mixed> $communeSelectionnee
      */
@@ -67,45 +67,6 @@ final class ReseauView
     }
 
     /**
-     * Afficher le seul reseau disponible pour la commune et
-     * afficher les paramètres mésurés.
-     *
-     * @param array<string, mixed> $communeSelectionnee
-     * @param array<string, mixed> $reseau
-     * @param string $parametres
-     */
-    public function afficherReseauDirect(array $communeSelectionnee, array $reseau, string $parametres): string
-    {
-
-        ob_start(); ?>
-        <p>
-            Commune :
-            <strong>
-                <?= $this->escape($communeSelectionnee['nom_commune']) ?>
-            </strong>
-            &gt;
-            Réseau :
-            <strong><?= $this->escape($reseau['nom_reseau']) ?></strong>
-        </p>
-
-        <?php if (!empty($reseau['quartiers'])): ?>
-            <p>
-                 — Quartier(s) :
-                <?= $this->escape($reseau['quartiers']) ?>
-            </p>
-        <?php endif; ?>
-        <br><br>
-        <h2>Choisir les paramètres mesurés : </h2>
-            <p>
-                <?= $this->escape($parametres) ?>
-            </p>
-
-        <?php
-    return (new Layout("Réseau", "Page de recherche des données de réseau", (string) ob_get_clean()))->afficher();
-    }
-
-
-    /**
      * Afficher les réseaux afin que l'utilisateur puisse sélectionner celui qui correspond.
      *
      * @param array<string, mixed> $communeSelectionnee
@@ -122,7 +83,7 @@ final class ReseauView
             </strong>
         </p>
 
-        <form method="GET">
+        <form method="GET" action="/reseau">
             <!-- Permet de garder le code insee entre requetes -->
             <input type="hidden" name="commune"
                 value="<?= $this->escape($communeSelectionnee['insee']) ?>" >
