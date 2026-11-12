@@ -168,7 +168,7 @@ final class ParametresView
     <script src="/js/rechercheParametres.js" defer></script>
 
     <?php
-    return (new Layout("Parametres", "Page d'affichage des parametres", (string) ob_get_clean()))->afficher();
+    return (new Layout("Parametres", "Page d'affichage des parametres", (string) ob_get_clean(), ["graphique"]))->afficher();
     }
 
     // /**

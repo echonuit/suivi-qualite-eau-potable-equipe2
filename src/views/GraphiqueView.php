@@ -15,7 +15,7 @@ final class GraphiqueView
         ob_start();
         ?>
         <section class="graphique-reseau">
-            <?php if ($donnees === [] || array_sum(array_column($donnees, 'valeur')) === 0): 
+            <?php if ($donnees === [] || array_sum(array_column($donnees, 'valeur')) === 0):
                 print_r($donnees)?>
                 <p>Aucune mesure.</p>
             <?php else: ?>
@@ -76,15 +76,17 @@ final class GraphiqueView
 
         $points = [];
         foreach ($donnees as $index => $ligne) {
-            $x = $gauche + ($index * $ecartX);
-            $y = $bas - (($ligne['valeur'] / $maximum) * ($bas - $haut));
+            if($ligne['valeur'] > 0){
+                $x = $gauche + ($index * $ecartX);
+                $y = $bas - (($ligne['valeur'] / $maximum) * ($bas - $haut));
 
-            $points[] = [
-                'x' => $x,
-                'y' => $y,
-                'date' => $ligne['date'],
-                'valeur' => $ligne['valeur'],
-            ];
+                $points[] = [
+                    'x' => $x,
+                    'y' => $y,
+                    'date' => $ligne['date'],
+                    'valeur' => $ligne['valeur'],
+                ];
+            }
         }
 
         $coordonnees = [];
@@ -140,6 +142,7 @@ final class GraphiqueView
                             r="4" fill="#0000FF" />
                     <text x="<?= round($point['x'], 1) ?>"
                           y="<?= $bas + 20 ?>"
+                          transform="rotate(90 ,<?= round($point['x'], 1)?>,<?=$bas + 20?>)"
                           text-anchor="middle" font-size="11" fill="#000">
                         <?= $this->nomMois($point['date']) ?>
                     </text>
