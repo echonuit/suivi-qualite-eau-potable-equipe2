@@ -25,7 +25,7 @@ class Layout
     <title><?php echo htmlspecialchars($this->titre) ?></title>
     <link rel="stylesheet" href="/styles/global.css">
     <?php foreach ($this->styles as $style): ?>
-        <link rel="stylesheet" href="/src/styles/<?php echo htmlspecialchars($style) ?>.css">
+        <link rel="stylesheet" href="/styles/<?php echo htmlspecialchars($style) ?>.css">
     <?php endforeach; ?>
 </head>
 <body>
