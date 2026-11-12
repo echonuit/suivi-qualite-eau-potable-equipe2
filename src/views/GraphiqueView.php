@@ -171,6 +171,6 @@ final class GraphiqueView
             9 => 'Sept.', 10 => 'Oct.', 11 => 'Nov.', 12 => 'Déc.',
         ];
 
-        return $noms[(int) $date->format('n')] . ' ' . $date->format('y');
+        return $date->format('d') . ' ' . $noms[(int) $date->format('n')] . ' ' . $date->format('y');
     }
 }
