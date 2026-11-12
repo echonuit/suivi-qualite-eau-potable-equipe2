@@ -64,4 +64,21 @@ final class GraphiqueModel
             $requete->fetchAll(PDO::FETCH_ASSOC)
         );
     }
+
+    /**
+     * @param string $codeParam code paramètre sandre
+     * @return int valeur du seuil à ne pas dépasser dans les prélèvements
+     */
+    public function getLimite(string $codeParam){
+        $sql = "SELECT valeur
+                FROM schema.limite
+                WHERE code_param_sandre = :code_param";
+
+        $requete = $this->pdo->prepare($sql);
+        $requete->execute(['code_param' => $codeParam]);
+
+        $limite = $requete->fetchColumn();
+
+        return (int) $limite;
+    }
 }

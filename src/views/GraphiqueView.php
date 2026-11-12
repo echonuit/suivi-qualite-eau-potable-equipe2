@@ -8,7 +8,7 @@ use DateTimeImmutable;
 
 final class GraphiqueView
 {
-    public function afficher(array $mesures): string
+    public function afficher(array $mesures, int $limite): string
     {
         $donnees = $this->completerDate($mesures);
 
@@ -19,7 +19,7 @@ final class GraphiqueView
                 print_r($donnees)?>
                 <p>Aucune mesure.</p>
             <?php else: ?>
-                <?= $this->dessinerGraphique($donnees) ?>
+                <?= $this->dessinerGraphique($donnees,$limite) ?>
             <?php endif; ?>
         </section>
         <?php
@@ -59,7 +59,7 @@ final class GraphiqueView
     }
 
     // Construit le graphique SVG avec les valeurs récupérées dans la base.
-    private function dessinerGraphique(array $donnees): string
+    private function dessinerGraphique(array $donnees,int $limite): string
     {
         $largeur = 800;
         $hauteur = 360;
@@ -70,6 +70,7 @@ final class GraphiqueView
 
         $maximum = max(array_column($donnees, 'valeur'));
         $maximum = max(1, (int) ceil($maximum * 1.1));
+        $maximum = max($maximum,$limite);
 
         $nombrePoints = count($donnees);
         $ecartX = ($droite - $gauche) / max(1, $nombrePoints - 1);
@@ -147,6 +148,11 @@ final class GraphiqueView
                         <?= $this->nomMois($point['date']) ?>
                     </text>
                 <?php endforeach; ?>
+
+                <!-- Courbe de limite -->
+                <line x1="<?= $gauche ?>" y1="<?= $bas - (($limite / $maximum) * ($bas - $haut)) ?>"
+                      x2="<?= $droite ?>" y2="<?= $bas - (($limite / $maximum) * ($bas - $haut))  ?>"
+                      stroke="#ff0000" />
             </svg>
             <figcaption>Valeur du paramètre à chaque prélèvement</figcaption>
         </figure>
