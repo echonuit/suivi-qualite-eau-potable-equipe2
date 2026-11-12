@@ -33,7 +33,7 @@ final class GraphiqueController
             }
         }
         if ($derniereDate === null) {
-            return (new GraphiqueView())->afficher([],0);
+            return (new GraphiqueView())->afficher([], 0);
         }
 
         $fin = new DateTimeImmutable($derniereDate);
@@ -43,10 +43,10 @@ final class GraphiqueController
             $codeReseau,
             "1340",
             $debut->format('Y-m-d'),
-            $fin->format('Y-m-d')
+            $fin->format('Y-m-d'),
         );
 
-        return (new GraphiqueView())->afficher($mesures,$graphiqueModele->getLimite("1340"));
+        return (new GraphiqueView())->afficher($mesures, $graphiqueModele->getLimite("1340"));
     }
 
 }

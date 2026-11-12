@@ -61,7 +61,7 @@ final class GraphiqueModel
                 'date' => (string) $ligne['date_prelevement'],
                 'valeur' => (float) $ligne['valeur'],
             ],
-            $requete->fetchAll(PDO::FETCH_ASSOC)
+            $requete->fetchAll(PDO::FETCH_ASSOC),
         );
     }
 
@@ -69,7 +69,8 @@ final class GraphiqueModel
      * @param string $codeParam code paramètre sandre
      * @return int valeur du seuil à ne pas dépasser dans les prélèvements
      */
-    public function getLimite(string $codeParam){
+    public function getLimite(string $codeParam)
+    {
         $sql = "SELECT valeur
                 FROM schema.limite
                 WHERE code_param_sandre = :code_param";

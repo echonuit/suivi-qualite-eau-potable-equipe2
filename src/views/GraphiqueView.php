@@ -19,7 +19,7 @@ final class GraphiqueView
                 print_r($donnees)?>
                 <p>Aucune mesure.</p>
             <?php else: ?>
-                <?= $this->dessinerGraphique($donnees,$limite) ?>
+                <?= $this->dessinerGraphique($donnees, $limite) ?>
             <?php endif; ?>
         </section>
         <?php
@@ -59,7 +59,7 @@ final class GraphiqueView
     }
 
     // Construit le graphique SVG avec les valeurs récupérées dans la base.
-    private function dessinerGraphique(array $donnees,int $limite): string
+    private function dessinerGraphique(array $donnees, int $limite): string
     {
         $largeur = 800;
         $hauteur = 360;
@@ -70,14 +70,14 @@ final class GraphiqueView
 
         $maximum = max(array_column($donnees, 'valeur'));
         $maximum = max(1, (int) ceil($maximum * 1.1));
-        $maximum = max($maximum,$limite);
+        $maximum = max($maximum, $limite);
 
         $nombrePoints = count($donnees);
         $ecartX = ($droite - $gauche) / max(1, $nombrePoints - 1);
 
         $points = [];
         foreach ($donnees as $index => $ligne) {
-            if($ligne['valeur'] > 0){
+            if ($ligne['valeur'] > 0) {
                 $x = $gauche + ($index * $ecartX);
                 $y = $bas - (($ligne['valeur'] / $maximum) * ($bas - $haut));
 
@@ -98,6 +98,7 @@ final class GraphiqueView
         ob_start();
         ?>
         <figure class="carte-graphique">
+            <figcaption>Valeur du paramètre à chaque prélèvement</figcaption>
             <svg
                 viewBox="0 0 <?= $largeur ?> <?= $hauteur ?>"
                 role="img"
@@ -116,7 +117,7 @@ final class GraphiqueView
                 <?php for ($i = 0; $i <= 4; $i++):
                     $valeur = round($maximum * $i / 4);
                     $y = $bas - (($valeur / $maximum) * ($bas - $haut));
-                ?>
+                    ?>
                     <line x1="<?= $gauche ?>" y1="<?= $y ?>"
                           x2="<?= $droite ?>" y2="<?= $y ?>"
                           stroke="#dddddd" />
@@ -154,7 +155,7 @@ final class GraphiqueView
                       x2="<?= $droite ?>" y2="<?= $bas - (($limite / $maximum) * ($bas - $haut))  ?>"
                       stroke="#ff0000" />
             </svg>
-            <figcaption>Valeur du paramètre à chaque prélèvement</figcaption>
+            
         </figure>
         <?php
 
