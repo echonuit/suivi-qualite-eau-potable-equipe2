@@ -156,10 +156,6 @@ final class ParametresView
 
                                 <h3><?= $this->escape($parametre['libelle']) ?></h3>
 
-                                <p>
-                                    Les données/graph de ce paramètre seront affichées ici.
-                                </p>
-
                             <?php endif; ?>
 
                         <?php endforeach; ?>
@@ -172,7 +168,7 @@ final class ParametresView
     <script src="/js/rechercheParametres.js" defer></script>
 
     <?php
-    return (new Layout("Parametres", "Page d'affichage des parametres", (string) ob_get_clean()))->afficher();
+    return (new Layout("Parametres", "Page d'affichage des parametres", (string) ob_get_clean(), ["graphique"]))->afficher();
     }
 
     // /**

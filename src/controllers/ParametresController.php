@@ -19,7 +19,8 @@ final class ParametresController
 
         $parametresModele = new ParametresModel();
         $reseauModele = new ReseauModel();
-        $vue = new ParametresView();
+        $parametresVue = new ParametresView();
+        $graphiqueController = new GraphiqueController();
 
 
         // on récupère le parametre recherché et le réseau et commune sélectionnés par l'utilisateur dans l'url
@@ -62,7 +63,7 @@ final class ParametresController
 
         //si aucun prélèvement est associé au réseau selectionné
         if (empty($parametres)) { //càd $parametres === []
-            return $vue->afficherAucunParametre($reseauSelectionne);
+            return $parametresVue->afficherAucunParametre($reseauSelectionne);
         }
 
         $codesParamDisponibles = [];
@@ -95,6 +96,6 @@ final class ParametresController
 
         $parametresSelectionnes = array_keys($selectionDeParametres);
 
-        return $vue-> afficherParametres($communeSelectionnee, $reseauSelectionne, $parametres, $parametresSelectionnes, $nombreMesures, $derniereMesure);
+        return $parametresVue-> afficherParametres($communeSelectionnee, $reseauSelectionne, $parametres, $parametresSelectionnes, $nombreMesures, $derniereMesure) . $graphiqueController->executer($requete);
     }
 }
